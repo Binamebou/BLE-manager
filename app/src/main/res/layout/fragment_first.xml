@@ -7,7 +7,7 @@
     tools:context=".FirstFragment">
 
     <Button
-        android:id="@+id/button_first"
+        android:id="@+id/garage_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="24dp"
@@ -29,7 +29,7 @@
         tools:layout_editor_absoluteY="18dp" />
 
     <Switch
-        android:id="@+id/switch1"
+        android:id="@+id/garage_connected"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="24dp"
@@ -37,7 +37,7 @@
         android:checked="false"
         android:clickable="false"
         android:text="@string/connected_chip"
-        app:layout_constraintStart_toEndOf="@+id/button_first"
+        app:layout_constraintStart_toEndOf="@+id/garage_button"
         app:layout_constraintTop_toBottomOf="@+id/textView" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

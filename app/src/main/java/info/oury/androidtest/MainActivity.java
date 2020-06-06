@@ -1,10 +1,14 @@
 package info.oury.androidtest;
 
+import android.app.AlertDialog;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothGatt;
 import android.bluetooth.BluetoothManager;
 import android.bluetooth.le.BluetoothLeScanner;
+import android.content.DialogInterface;
+import android.content.pm.PackageManager;
+import android.net.Uri;
 import android.os.Bundle;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
@@ -20,43 +24,14 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.Switch;
 import android.widget.TextView;
 
 import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity {
 
-    BluetoothManager btManager;
-    BluetoothAdapter btAdapter;
-    BluetoothLeScanner btScanner;
-    Button startScanningButton;
-    Button stopScanningButton;
-    TextView peripheralTextView;
-    private final static int REQUEST_ENABLE_BT = 1;
     private static final int PERMISSION_REQUEST_COARSE_LOCATION = 1;
-
-    Boolean btScanning = false;
-    int deviceIndex = 0;
-    ArrayList<BluetoothDevice> devicesDiscovered = new ArrayList<BluetoothDevice>();
-    EditText deviceIndexInput;
-    Button connectToDevice;
-    Button disconnectDevice;
-    BluetoothGatt bluetoothGatt;
-
-    public final static String ACTION_GATT_CONNECTED =
-            "com.example.bluetooth.le.ACTION_GATT_CONNECTED";
-    public final static String ACTION_GATT_DISCONNECTED =
-            "com.example.bluetooth.le.ACTION_GATT_DISCONNECTED";
-    public final static String ACTION_GATT_SERVICES_DISCOVERED =
-            "com.example.bluetooth.le.ACTION_GATT_SERVICES_DISCOVERED";
-    public final static String ACTION_DATA_AVAILABLE =
-            "com.example.bluetooth.le.ACTION_DATA_AVAILABLE";
-    public final static String EXTRA_DATA =
-            "com.example.bluetooth.le.EXTRA_DATA";
-
-    // Stops scanning after 5 seconds.
-    private Handler mHandler = new Handler();
-    private static final long SCAN_PERIOD = 5000;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -64,17 +39,20 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-
-
-
+        BleManager.getInstance().init(this);
         FloatingActionButton scan = findViewById(R.id.scan);
         scan.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Snackbar.make(view, "Scan for devices", Snackbar.LENGTH_LONG)
-                        .setAction("Scan", null).show();
+                Snackbar.make(view, "Scanning for devices", Snackbar.LENGTH_LONG)
+                        .show();
+
+                System.out.println("on demande un scan");
+                BleManager.getInstance().scan(new ScanBleCallback(view));
+
             }
         });
+
     }
 
     @Override
@@ -97,5 +75,56 @@ public class MainActivity extends AppCompatActivity {
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+
+        BleManager.getInstance().disconnect();
+    }
+
+    class ScanBleCallback {
+
+        private final View view;
+
+        public ScanBleCallback(View view) {
+            this.view = view;
+        }
+
+        public void onScanned(ScanBleResult result) {
+            Snackbar.make(view, "Scan done", Snackbar.LENGTH_LONG)
+                    .show();
+
+            Switch garageSwith = findViewById(R.id.garage_connected);
+            garageSwith.setChecked(result.isGarageConnected());
+
+            System.out.println("Scan done");
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
+        switch (requestCode) {
+            case PERMISSION_REQUEST_COARSE_LOCATION: {
+                if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    System.out.println("coarse location permission granted");
+                } else {
+                    final AlertDialog.Builder builder = new AlertDialog.Builder(this);
+                    builder.setTitle("Functionality limited");
+                    builder.setMessage("Since location access has not been granted, this app will not be able to discover beacons when in the background.");
+                    builder.setPositiveButton(android.R.string.ok, null);
+                    builder.setOnDismissListener(new DialogInterface.OnDismissListener() {
+
+                        @Override
+                        public void onDismiss(DialogInterface dialog) {
+                        }
+
+                    });
+                    builder.show();
+                }
+                return;
+            }
+        }
     }
 }

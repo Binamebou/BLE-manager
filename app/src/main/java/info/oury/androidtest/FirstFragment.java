@@ -7,7 +7,6 @@ import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
-import androidx.navigation.fragment.NavHostFragment;
 
 public class FirstFragment extends Fragment {
 
@@ -23,12 +22,16 @@ public class FirstFragment extends Fragment {
     public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        view.findViewById(R.id.button_first).setOnClickListener(new View.OnClickListener() {
+        view.findViewById(R.id.garage_button).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                System.out.println("Scan for devices");
-
+                BleManager bleManager = BleManager.getInstance();
+                if (bleManager.getScanBleResult() != null && bleManager.getScanBleResult().isGarageConnected()) {
+                    bleManager.sendGarageCommand();
+                }
             }
         });
     }
+
+
 }
