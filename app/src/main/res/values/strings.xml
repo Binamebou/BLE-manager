@@ -1,0 +1,11 @@
+<resources>
+    <string name="app_name">BLE relay controler</string>
+    <string name="action_settings">Settings</string>
+    <!-- Strings used for fragments for navigation -->
+    <string name="devices">Devices</string>
+    <string name="scan_button">Scan devices</string>
+    <string name="garage_button">Garage</string>
+    <string name="connected_chip">Connected</string>
+
+
+</resources>
